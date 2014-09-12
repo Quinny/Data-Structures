@@ -60,12 +60,12 @@ template <typename T>
 
 void Heap<T>::upHeap(){
 	for(int i=heap_.size()-1;i>0;){
-		T parent=((i+1)/2)-1; //
+		int parent=((i+1)/2)-1; //the index of the parent node
 
-		if(heap_[parent] > heap_[i])
+		if(heap_[parent] > heap_[i]) //if the parent is greater than the child then were done
 			break;
 
-		std::swap(heap_[parent],heap_[i]);
+		std::swap(heap_[parent],heap_[i]); //otherwise swap them and continue
 
 		i=parent;
 	}
