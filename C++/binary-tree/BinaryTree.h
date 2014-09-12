@@ -19,7 +19,6 @@ struct Node{
 	bool hasRight(){
 		return right_!=nullptr;
 	}
-
 };
 
 
