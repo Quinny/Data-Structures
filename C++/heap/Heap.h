@@ -27,6 +27,7 @@ class Heap{
 		void insert(T const&);
 		void print();
 		T pop();
+		T peek();
 
 		bool empty();
 		int size();
@@ -114,6 +115,12 @@ T Heap<T>::pop(){
 	heap_.pop_back();
 	downHeap();
 	return val;
+}
+
+template <typename T>
+
+T Heap<T>::peek(){
+	return heap_.front();
 }
 
 
