@@ -64,8 +64,9 @@ public class BTree<T extends Comparable<? super T>>{
 			if(currentRow==1){
 				if(nextRow>maxRow){
 					maxRow=nextRow;
-					nextRow=0;
 				}
+				currentRow=nextRow;
+				nextRow=0;
 			}
 			else{
 				currentRow--;
