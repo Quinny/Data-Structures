@@ -1,3 +1,6 @@
+#ifndef QP_BIT_VECTOR_H_
+#define QP_BIT_VECTOR_H_
+
 #include <string>
 
 template <unsigned long N>
@@ -14,6 +17,7 @@ class bit_vector{
 		bool get(const unsigned long) const;
 		void flip(const unsigned long);
 		void unset(const unsigned long);
+		constexpr unsigned long size() const { return N; }
 		std::string to_string() const;
 
 		bool operator[] (const unsigned long i) const { return get(i); }
@@ -80,3 +84,5 @@ std::string bit_vector<N>::to_string() const {
 	}
 	return s;
 }
+
+#endif
