@@ -7,14 +7,19 @@ namespace qap {
 
 template <typename T>
 struct Node {
-    Node(T d) : datum_(d), left_(nullptr), right_(nullptr), is_threaded(false) {};
-
     Node* left_;
     Node* right_;
     T datum_;
     // if false, the right child is the actual right child
     // if true, the right child is the next node in the in-order traversal
     bool is_threaded;
+
+    Node(T d) : datum_(d), left_(nullptr), right_(nullptr), is_threaded(false) {};
+    ~Node() {
+        delete left_;
+        if (!is_threaded)
+            delete right_;
+    }
 };
 
 template <typename T>
@@ -22,7 +27,6 @@ class tt_iterator {
     Node<T>* n;
     public:
         tt_iterator(Node<T>* t) : n(t) {};
-
         bool operator == (tt_iterator<T> const& t) {
             return t.n == n;
         }
@@ -61,39 +65,48 @@ template <typename T>
 class threaded_tree {
     private:
         Node<T>* root_;
-        Node<T>* left_most(Node<T>* root);
+        std::size_t size_;
 
+        Node<T>* left_most(Node<T>* root);
+        std::pair<tt_iterator<T>, bool> insert(Node<T>* n, Node<T>* p);
     public:
-        threaded_tree() : root_(nullptr) {};
-        void insert(T x);
-        void insert(Node<T>* n, Node<T>* p);
-        // just for testing purposes
-        std::vector<T> in_order();
+        threaded_tree() : root_(nullptr), size_(0) {};
+        ~threaded_tree() { delete root_; }
+
+        std::pair<tt_iterator<T>, bool> insert(T x);
+        std::size_t size() const { return size_; }
 
         tt_iterator<T> begin() { return tt_iterator<T>(root_); }
         tt_iterator<T> end() { return tt_iterator<T>(nullptr); }
 };
 
 template <typename T>
-void threaded_tree<T>::insert(T x) {
+std::pair<tt_iterator<T>, bool> threaded_tree<T>::insert(T x) {
     Node<T>* n = new Node<T>(x);
-    if (root_ == nullptr)
+    if (root_ == nullptr){
         root_ = n;
+        return std::make_pair(begin(), true);
+    }
     else
-        insert(n, root_);
+        return insert(n, root_);
 }
 
 template <typename T>
-void threaded_tree<T>::insert(Node<T>* n, Node<T>* p) {
+std::pair<tt_iterator<T>, bool> threaded_tree<T>::insert(Node<T>* n, Node<T>* p) {
+    if (n->datum_ == p->datum_) {
+        delete n;
+        return std::make_pair(tt_iterator<T>(p), false);
+    }
     if (n->datum_ < p->datum_) {
         // When inserting node B to the left of A
         if (p->left_ == nullptr) {
             p->left_ = n; // assign the left value
             n->right_ = p; // thread the node up to its parent
             n->is_threaded = true;
+            return std::make_pair(tt_iterator<T>(n), true);
         }
         else
-            insert(n, p->left_);
+            return insert(n, p->left_);
     }
     else {
         // When inserting node B to the right of A
@@ -102,9 +115,10 @@ void threaded_tree<T>::insert(Node<T>* n, Node<T>* p) {
             n->right_ = p->right_; // thread B to A's old thread
             n->is_threaded = true; // B is now threaded
             p->right_ = n;
+            return std::make_pair(tt_iterator<T>(n), true);
         }
         else
-            insert(n, p->right_);
+            return insert(n, p->right_);
     }
 }
 
@@ -115,20 +129,6 @@ Node<T>* threaded_tree<T>::left_most(Node<T>* root) {
     while (root->left_ != nullptr)
         root = root->left_;
     return root;
-}
-
-template <typename T>
-std::vector<T> threaded_tree<T>::in_order() {
-    auto cur = left_most(root_);
-    std::vector<T> v;
-    while (cur != nullptr) {
-        v.push_back(cur->datum_);
-        if (cur->is_threaded)
-            cur = cur->right_;
-        else
-            cur = left_most(cur->right_);
-    }
-    return v;
 }
 
 }

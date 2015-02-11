@@ -1,16 +1,15 @@
 #include <iostream>
 #include "threaded_tree.h"
-#include <algorithm>
 #include <cassert>
 #include <random>
-#include <map>
+#include <set>
+#include <algorithm>
 
 int main() {
     srand(time(NULL));
     qap::threaded_tree<int> t;
+    //std::set<int> t;
     for (int i = 0; i < 1000000; ++i)
-        t.insert(rand());
-    for(auto s : t);
-
+          t.insert(rand());
     return 0;
 }
