@@ -3,6 +3,8 @@
 
 #include <vector> // just for testing the sorted-ness
 
+namespace qap {
+
 template <typename T>
 struct Node {
     Node(T d) : datum_(d), left_(nullptr), right_(nullptr), is_threaded(false) {};
@@ -33,11 +35,15 @@ class tt_iterator {
             return n->datum_;
         }
 
-        void operator ++() {
+        tt_iterator<T>& operator ++() {
+            // if the current node is threaded, simply traverse the thread
             if (n->is_threaded)
                 n = n->right_;
             else
+                // otherwise move to the left most node in the right tree
+                // (which will be guarunteed to be threaded)
                 n = left_most(n->right_);
+            return *this;
         }
 
     private:
@@ -80,19 +86,21 @@ void threaded_tree<T>::insert(T x) {
 template <typename T>
 void threaded_tree<T>::insert(Node<T>* n, Node<T>* p) {
     if (n->datum_ < p->datum_) {
+        // When inserting node B to the left of A
         if (p->left_ == nullptr) {
-            p->left_ = n;
-            n->right_ = p;
+            p->left_ = n; // assign the left value
+            n->right_ = p; // thread the node up to its parent
             n->is_threaded = true;
         }
         else
             insert(n, p->left_);
     }
     else {
+        // When inserting node B to the right of A
         if (p->right_ == nullptr || p->is_threaded) {
-            p->is_threaded = false;
-            n->right_ = p->right_;
-            n->is_threaded = true;
+            p->is_threaded = false; // A is not longer threaded
+            n->right_ = p->right_; // thread B to A's old thread
+            n->is_threaded = true; // B is now threaded
             p->right_ = n;
         }
         else
@@ -123,4 +131,5 @@ std::vector<T> threaded_tree<T>::in_order() {
     return v;
 }
 
+}
 #endif
