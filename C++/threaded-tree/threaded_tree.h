@@ -14,7 +14,8 @@ struct Node {
 
     Node(T d) : datum_(d), left_(nullptr), right_(nullptr), thread_mask() {};
     ~Node() {
-        delete left_;
+        if (!threaded_left())
+            delete left_;
         if (!threaded_right())
             delete right_;
     }
@@ -42,43 +43,10 @@ struct Node {
     }
 };
 
-template <typename T>
-class tt_iterator {
-    Node<T>* n;
-    public:
-        tt_iterator(Node<T>* t) : n(t) {};
-        bool operator == (tt_iterator<T> const& t) {
-            return t.n == n;
-        }
 
-        bool operator != (tt_iterator<T> const& t) {
-            return t.n != n;
-        }
-
-        T operator *() {
-            return n->datum_;
-        }
-
-        tt_iterator<T>& operator ++() {
-            // if the current node is threaded, simply traverse the thread
-            if (n->threaded_right())
-                n = n->right_;
-            else
-                // otherwise move to the left most node in the right tree
-                // (which will be guarunteed to be threaded)
-                n = left_most(n->right_);
-            return *this;
-        }
-
-    private:
-        Node<T>* left_most(Node<T>* root) {
-            if (root == nullptr)
-                return nullptr;
-            while (root->left_ != nullptr)
-                root = root->left_;
-            return root;
-        }
-};
+// The depandancy tree got kind of messy
+// This is a hacky fix, SHOULD BE RETHOUGHT SOON
+#include "tt_iterators.h"
 
 
 template <typename T>
@@ -88,6 +56,7 @@ class threaded_tree {
         std::size_t size_;
 
         Node<T>* left_most(Node<T>* root);
+        Node<T>* right_most(Node<T>* root);
         tt_iterator<T> insert(Node<T>* n, Node<T>* p);
     public:
         threaded_tree() : root_(nullptr), size_(0) {};
@@ -97,7 +66,10 @@ class threaded_tree {
         std::size_t size() const { return size_; }
 
         tt_iterator<T> begin() { return tt_iterator<T>(left_most(root_)); }
-        tt_iterator<T> end() { return tt_iterator<T>(nullptr); }
+        tt_iterator<T> end() { return tt_iterator<T>(); }
+
+        r_tt_iterator<T> rbegin() { return r_tt_iterator<T>(right_most(root_)); }
+        r_tt_iterator<T> rend() { return r_tt_iterator<T>(); }
 };
 
 template <typename T>
@@ -119,10 +91,20 @@ tt_iterator<T> threaded_tree<T>::insert(Node<T>* n, Node<T>* p) {
     }
     if (n->datum_ < p->datum_) {
         // When inserting node B to the left of A
-        if (p->left_ == nullptr) {
-            p->left_ = n; // assign the left value
+        if (p->left_ == nullptr || p->threaded_left()) {
+            ++size_;
+
+            // set up right thread
             n->right_ = p; // thread the node up to its parent
             n->threaded_right(true);
+
+            // set up left thread
+            p->threaded_left(false);
+            n->left_ = p->left_;
+            n->threaded_left(true);
+
+            // actually add
+            p->left_ = n;
             return tt_iterator<T>(n);
         }
         else
@@ -131,9 +113,18 @@ tt_iterator<T> threaded_tree<T>::insert(Node<T>* n, Node<T>* p) {
     else {
         // When inserting node B to the right of A
         if (p->right_ == nullptr || p->threaded_right()) {
+            ++size_;
+
+            // set up right thread
             p->threaded_right(false); // A is not longer threaded
             n->right_ = p->right_; // thread B to A's old thread
             n->threaded_right(true); // B is now threaded
+
+            // set up left thread
+            n->left_ = p;
+            n->threaded_left(true);
+
+            // actually add
             p->right_ = n;
             return tt_iterator<T>(n);
         }
@@ -146,8 +137,17 @@ template <typename T>
 Node<T>* threaded_tree<T>::left_most(Node<T>* root) {
     if (root == nullptr)
         return nullptr;
-    while (root->left_ != nullptr)
+    while (root->left_ != nullptr && !root->threaded_left())
         root = root->left_;
+    return root;
+}
+
+template <typename T>
+Node<T>* threaded_tree<T>::right_most(Node <T>* root) {
+    if (root == nullptr)
+        return nullptr;
+    while (root->right_ != nullptr && !root->threaded_right())
+        root = root->right_;
     return root;
 }
 
