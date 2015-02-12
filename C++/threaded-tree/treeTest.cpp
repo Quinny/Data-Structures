@@ -10,6 +10,8 @@ int main() {
     qap::threaded_tree<int> t;
     //std::set<int> t;
     for (int i = 0; i < 1000000; ++i)
-          t.insert(rand());
+        t.insert(rand());
+    for (auto i : t)
+    ;
     return 0;
 }
