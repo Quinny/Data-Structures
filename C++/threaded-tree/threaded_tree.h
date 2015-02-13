@@ -78,6 +78,7 @@ template <typename T, typename Compare>
 tt_iterator<T> threaded_tree<T, Compare>::insert(T x) {
     Node<T>* n = new Node<T>(x);
     if (root_ == nullptr){
+        ++size_;
         root_ = n;
         return begin();
     }
@@ -87,52 +88,55 @@ tt_iterator<T> threaded_tree<T, Compare>::insert(T x) {
 
 template <typename T, typename Compare>
 tt_iterator<T> threaded_tree<T, Compare>::insert(Node<T>* n, Node<T>* p) {
-    if (n->datum_ == p->datum_) {
-        delete n;
-        return tt_iterator<T>(p);
-    }
-    if (cmp(n->datum_, p->datum_)) {
-        // When inserting node B to the left of A
-        if (p->left_ == nullptr || p->threaded_left()) {
-            ++size_;
-
-            // set up right thread
-            n->right_ = p; // thread the node up to its parent
-            n->threaded_right(true);
-
-            // set up left thread
-            p->threaded_left(false);
-            n->left_ = p->left_;
-            n->threaded_left(true);
-
-            // actually add
-            p->left_ = n;
-            return tt_iterator<T>(n);
+    while (p != nullptr) {
+        if (n->datum_ == p->datum_) {
+            delete n;
+            return tt_iterator<T>(p);
         }
-        else
-            return insert(n, p->left_);
-    }
-    else {
-        // When inserting node B to the right of A
-        if (p->right_ == nullptr || p->threaded_right()) {
-            ++size_;
+        if (cmp(n->datum_, p->datum_)) {
+            // When inserting node B to the left of A
+            if (p->left_ == nullptr || p->threaded_left()) {
+                ++size_;
 
-            // set up right thread
-            p->threaded_right(false); // A is not longer threaded
-            n->right_ = p->right_; // thread B to A's old thread
-            n->threaded_right(true); // B is now threaded
+                // set up right thread
+                n->right_ = p; // thread the node up to its parent
+                n->threaded_right(true);
 
-            // set up left thread
-            n->left_ = p;
-            n->threaded_left(true);
+                // set up left thread
+                p->threaded_left(false);
+                n->left_ = p->left_;
+                n->threaded_left(true);
 
-            // actually add
-            p->right_ = n;
-            return tt_iterator<T>(n);
+                // actually add
+                p->left_ = n;
+                return tt_iterator<T>(n);
+            }
+            else
+                p = p->left_;
         }
-        else
-            return insert(n, p->right_);
+        else {
+            // When inserting node B to the right of A
+            if (p->right_ == nullptr || p->threaded_right()) {
+                ++size_;
+
+                // set up right thread
+                p->threaded_right(false); // A is not longer threaded
+                n->right_ = p->right_; // thread B to A's old thread
+                n->threaded_right(true); // B is now threaded
+
+                // set up left thread
+                n->left_ = p;
+                n->threaded_left(true);
+
+                // actually add
+                p->right_ = n;
+                return tt_iterator<T>(n);
+            }
+            else
+                p = p->right_;
+        }
     }
+    return tt_iterator<T>();
 }
 
 template <typename T, typename Compare>

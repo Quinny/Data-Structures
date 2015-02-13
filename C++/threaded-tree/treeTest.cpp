@@ -1,20 +1,54 @@
 #include <iostream>
-#include <cassert>
 #include <random>
 #include <set>
-#include <algorithm>
 #include "threaded_tree.h"
+#include <chrono>
+#include <cassert>
+#include <algorithm>
 #include <iterator>
+
 #define N 1000000
+using namespace std::chrono;
+
+template <typename Tree>
+void insert_benchmark(Tree t);
+
+template <typename Tree>
+void iteration_benchmark(Tree t);
+
+std::default_random_engine gen;
+std::uniform_int_distribution<int> dst(INT_MIN, INT_MAX);
 
 int main() {
-    srand(time(NULL));
-    qap::threaded_tree<int, std::greater<int>> t;
+    qap::threaded_tree<int> t;
+    std::set<int> s;
 
-    for (int i = 0; i < 10; i++)
-        t.insert(2 * i + 1);
-    decltype(t)::iterator j = t.begin();
-    while (j != t.end()) {
-        std::cout << *(j++) << std::endl;
-    }
+    insert_benchmark(t);
+    insert_benchmark(s);
+
+    iteration_benchmark(t);
+    iteration_benchmark(s);
+}
+
+template <typename Tree>
+void iteration_benchmark(Tree t) {
+    auto t1 = high_resolution_clock::now();
+    for (auto i : t)
+    ;
+    auto t2 = high_resolution_clock::now();
+    auto time_span = duration_cast<duration<double>>(t2 - t1);
+    std::cout << time_span.count() << std::endl;
+    std::vector<int> v(N);
+    std::copy(t.begin(), t.end(), v.begin());
+    assert(std::is_sorted(v.begin(), v.end()));
+}
+
+template <typename Tree>
+void insert_benchmark(Tree t) {
+    auto t1 = high_resolution_clock::now();
+    for (int i = 0; i < N; i++)
+        t.insert(dst(gen));
+    auto t2 = high_resolution_clock::now();
+    auto time_span = duration_cast<duration<double>>(t2 - t1);
+    std::cout << time_span.count() << std::endl;
 }
