@@ -9,23 +9,12 @@
 
 int main() {
     srand(time(NULL));
-    qap::threaded_tree<int> t;
-    //std::set<int> t;
-    for (int i = 0; i < N; i++)
-        t.insert(rand());
-    std::vector<int> v(N);
-    std::copy(t.begin(), t.end(), v.begin());
-    assert(std::is_sorted(v.begin(), v.end()));
+    qap::threaded_tree<int, std::greater<int>> t;
 
-    std::copy(t.rbegin(), t.rend(), v.begin());
-    assert(std::is_sorted(v.begin(), v.end(), [] (int x, int y) { return x > y; }));
-    int c = 0;
-    for (auto i : t)
-        ++c;
-    std::cout << c << std::endl;
-    c = 0;
-    for (auto i = t.rbegin(); i != t.rend(); ++i)
-        ++c;
-    std::cout << c << std::endl;
-    return 0;
+    for (int i = 0; i < 10; i++)
+        t.insert(2 * i + 1);
+    decltype(t)::iterator j = t.begin();
+    while (j != t.end()) {
+        std::cout << *(j++) << std::endl;
+    }
 }

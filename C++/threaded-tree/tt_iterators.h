@@ -36,6 +36,12 @@ class tt_iterator {
             return *this;
         }
 
+        tt_iterator<T> operator ++(int) {
+            tt_iterator<T> tmp = *this;
+            operator++();
+            return tmp;
+        }
+
     private:
         Node<T>* left_most(Node<T>* root) {
             if (root == nullptr)
@@ -77,6 +83,12 @@ class r_tt_iterator {
                 // (which will be guarunteed to be threaded)
                 n = right_most(n->left_);
             return *this;
+        }
+
+        r_tt_iterator<T> operator ++(int) {
+            r_tt_iterator<T> tmp = *this;
+            operator++();
+            return tmp;
         }
 
     private:

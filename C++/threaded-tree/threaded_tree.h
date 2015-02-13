@@ -49,16 +49,18 @@ struct Node {
 #include "tt_iterators.h"
 
 
-template <typename T>
+template <typename T, typename Compare = std::less<T>>
 class threaded_tree {
     private:
         Node<T>* root_;
         std::size_t size_;
-
+        Compare cmp;
         Node<T>* left_most(Node<T>* root);
         Node<T>* right_most(Node<T>* root);
         tt_iterator<T> insert(Node<T>* n, Node<T>* p);
     public:
+        typedef tt_iterator<T> iterator;
+
         threaded_tree() : root_(nullptr), size_(0) {};
         ~threaded_tree() { delete root_; }
 
@@ -72,8 +74,8 @@ class threaded_tree {
         r_tt_iterator<T> rend() { return r_tt_iterator<T>(); }
 };
 
-template <typename T>
-tt_iterator<T> threaded_tree<T>::insert(T x) {
+template <typename T, typename Compare>
+tt_iterator<T> threaded_tree<T, Compare>::insert(T x) {
     Node<T>* n = new Node<T>(x);
     if (root_ == nullptr){
         root_ = n;
@@ -83,13 +85,13 @@ tt_iterator<T> threaded_tree<T>::insert(T x) {
         return insert(n, root_);
 }
 
-template <typename T>
-tt_iterator<T> threaded_tree<T>::insert(Node<T>* n, Node<T>* p) {
+template <typename T, typename Compare>
+tt_iterator<T> threaded_tree<T, Compare>::insert(Node<T>* n, Node<T>* p) {
     if (n->datum_ == p->datum_) {
         delete n;
         return tt_iterator<T>(p);
     }
-    if (n->datum_ < p->datum_) {
+    if (cmp(n->datum_, p->datum_)) {
         // When inserting node B to the left of A
         if (p->left_ == nullptr || p->threaded_left()) {
             ++size_;
@@ -133,8 +135,8 @@ tt_iterator<T> threaded_tree<T>::insert(Node<T>* n, Node<T>* p) {
     }
 }
 
-template <typename T>
-Node<T>* threaded_tree<T>::left_most(Node<T>* root) {
+template <typename T, typename Compare>
+Node<T>* threaded_tree<T, Compare>::left_most(Node<T>* root) {
     if (root == nullptr)
         return nullptr;
     while (root->left_ != nullptr && !root->threaded_left())
@@ -142,8 +144,8 @@ Node<T>* threaded_tree<T>::left_most(Node<T>* root) {
     return root;
 }
 
-template <typename T>
-Node<T>* threaded_tree<T>::right_most(Node <T>* root) {
+template <typename T, typename Compare>
+Node<T>* threaded_tree<T, Compare>::right_most(Node <T>* root) {
     if (root == nullptr)
         return nullptr;
     while (root->right_ != nullptr && !root->threaded_right())
