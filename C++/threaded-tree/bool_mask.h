@@ -12,7 +12,7 @@ class bool_mask {
         void unset(const unsigned int i) {
             c_ &= ~(1 << i);
         }
-        bool operator [](const unsigned int i) {
+        bool operator [](const unsigned int i) const {
             return c_ & (1 << i);
         }
 };

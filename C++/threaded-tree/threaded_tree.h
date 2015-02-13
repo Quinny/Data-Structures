@@ -12,7 +12,7 @@ struct Node {
     T datum_;
     bool_mask thread_mask;
 
-    Node(T d) : datum_(d), left_(nullptr), right_(nullptr), thread_mask() {};
+    Node(T const& d) : datum_(d), left_(nullptr), right_(nullptr), thread_mask() {};
     ~Node() {
         if (!threaded_left())
             delete left_;
@@ -20,7 +20,7 @@ struct Node {
             delete right_;
     }
 
-    bool threaded_left() {
+    bool threaded_left() const {
         return thread_mask[0];
     }
 
@@ -31,7 +31,7 @@ struct Node {
             thread_mask.unset(0);
     }
 
-    bool threaded_right() {
+    bool threaded_right() const {
         return thread_mask[1];
     }
 
@@ -55,27 +55,28 @@ class threaded_tree {
         Node<T>* root_;
         std::size_t size_;
         Compare cmp;
-        Node<T>* left_most(Node<T>* root);
-        Node<T>* right_most(Node<T>* root);
+        Node<T>* left_most(Node<T>* root) const;
+        Node<T>* right_most(Node<T>* root) const;
         tt_iterator<T> insert(Node<T>* n, Node<T>* p);
+
     public:
         typedef tt_iterator<T> iterator;
 
         threaded_tree() : root_(nullptr), size_(0) {};
         ~threaded_tree() { delete root_; }
 
-        tt_iterator<T> insert(T x);
+        tt_iterator<T> insert(T const& x);
         std::size_t size() const { return size_; }
 
-        tt_iterator<T> begin() { return tt_iterator<T>(left_most(root_)); }
-        tt_iterator<T> end() { return tt_iterator<T>(); }
+        tt_iterator<T> begin() const { return tt_iterator<T>(left_most(root_)); }
+        tt_iterator<T> end() const { return tt_iterator<T>(); }
 
-        r_tt_iterator<T> rbegin() { return r_tt_iterator<T>(right_most(root_)); }
-        r_tt_iterator<T> rend() { return r_tt_iterator<T>(); }
+        r_tt_iterator<T> rbegin() const { return r_tt_iterator<T>(right_most(root_)); }
+        r_tt_iterator<T> rend()  const { return r_tt_iterator<T>(); }
 };
 
 template <typename T, typename Compare>
-tt_iterator<T> threaded_tree<T, Compare>::insert(T x) {
+tt_iterator<T> threaded_tree<T, Compare>::insert(T const& x) {
     Node<T>* n = new Node<T>(x);
     if (root_ == nullptr){
         ++size_;
@@ -140,7 +141,7 @@ tt_iterator<T> threaded_tree<T, Compare>::insert(Node<T>* n, Node<T>* p) {
 }
 
 template <typename T, typename Compare>
-Node<T>* threaded_tree<T, Compare>::left_most(Node<T>* root) {
+Node<T>* threaded_tree<T, Compare>::left_most(Node<T>* root) const {
     if (root == nullptr)
         return nullptr;
     while (root->left_ != nullptr && !root->threaded_left())
@@ -149,7 +150,7 @@ Node<T>* threaded_tree<T, Compare>::left_most(Node<T>* root) {
 }
 
 template <typename T, typename Compare>
-Node<T>* threaded_tree<T, Compare>::right_most(Node <T>* root) {
+Node<T>* threaded_tree<T, Compare>::right_most(Node <T>* root) const {
     if (root == nullptr)
         return nullptr;
     while (root->right_ != nullptr && !root->threaded_right())

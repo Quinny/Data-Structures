@@ -13,15 +13,15 @@ class tt_iterator {
     public:
         tt_iterator(Node<T>* t) : n(t) {};
         tt_iterator() : n(nullptr) {};
-        bool operator == (tt_iterator<T> const& t) {
+        bool operator == (tt_iterator<T> const& t) const {
             return t.n == n;
         }
 
-        bool operator != (tt_iterator<T> const& t) {
+        bool operator != (tt_iterator<T> const& t) const {
             return t.n != n;
         }
 
-        T operator *() {
+        T operator *() const {
             return n->datum_;
         }
 
@@ -43,7 +43,7 @@ class tt_iterator {
         }
 
     private:
-        Node<T>* left_most(Node<T>* root) {
+        Node<T>* left_most(Node<T>* root) const {
             if (root == nullptr)
                 return nullptr;
             while (root->left_ != nullptr && !root->threaded_left())
@@ -62,15 +62,15 @@ class r_tt_iterator {
     public:
         r_tt_iterator(Node<T>* t) : n(t) {};
         r_tt_iterator() : n(nullptr) {};
-        bool operator == (r_tt_iterator<T> const& t) {
+        bool operator == (r_tt_iterator<T> const& t) const {
             return t.n == n;
         }
 
-        bool operator != (r_tt_iterator<T> const& t) {
+        bool operator != (r_tt_iterator<T> const& t) const {
             return t.n != n;
         }
 
-        T operator *() {
+        T operator *() const {
             return n->datum_;
         }
 
@@ -92,7 +92,7 @@ class r_tt_iterator {
         }
 
     private:
-        Node<T>* right_most(Node<T>* root) {
+        Node<T>* right_most(Node<T>* root) const {
             if (root == nullptr)
                 return nullptr;
             while (root->right_ != nullptr && !root->threaded_right())

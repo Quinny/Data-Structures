@@ -22,7 +22,7 @@ std::uniform_int_distribution<int> dst(INT_MIN, INT_MAX);
 int main() {
     qap::threaded_tree<int> t;
     std::set<int> s;
-
+    gen.seed(time(NULL));
     insert_benchmark(t);
     insert_benchmark(s);
 
