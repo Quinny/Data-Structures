@@ -6,6 +6,7 @@
 #include <cassert>
 #include <algorithm>
 #include <iterator>
+#include <limits.h>
 
 #define N 1000000
 using namespace std::chrono;

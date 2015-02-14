@@ -8,7 +8,7 @@
  */
 
 template <typename T>
-class tt_iterator {
+class tt_iterator : public std::iterator<std::output_iterator_tag, T> {
     Node<T>* n;
     public:
         tt_iterator(Node<T>* t) : n(t) {};
@@ -57,7 +57,7 @@ class tt_iterator {
  */
 
 template <typename T>
-class r_tt_iterator {
+class r_tt_iterator : public std::iterator<std::output_iterator_tag, T> {
     Node<T>* n;
     public:
         r_tt_iterator(Node<T>* t) : n(t) {};
