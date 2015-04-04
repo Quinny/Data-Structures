@@ -4,6 +4,8 @@
 #include <cstring>
 #include <memory>
 
+namespace qap {
+
 template <typename T>
 class vector {
     private:
@@ -11,13 +13,20 @@ class vector {
         T* data_;
         void resize();
     public:
+        using value_type = T;
+        void insert();
         // Constructors and destructor
         vector() : max_size_{10}, size_{0} {
             data_ = new T[max_size_];
         }
-        vector(vector<T>& v) : size_{v.size()}, max_size_{v.size()} {
+        vector(vector<T> const& v) : size_{v.size()}, max_size_{v.size()} {
             data_ = new T[v.size()];
             std::copy(v.begin(), v.end(), data_);
+        }
+        vector(vector<T>&& v) {
+            std::swap(size_, v.size_);
+            std::swap(max_size_, v.max_size_);
+            std::swap(data_, v.data_);
         }
         vector(std::initializer_list<T> d) : size_{d.size()}, max_size_{d.size()} {
             data_ = new T[d.size()];
@@ -26,7 +35,7 @@ class vector {
         ~vector() {
             delete[] data_;
         }
-        
+
         // Adding/deleting
         void push_back(T x);
         template <typename iter>
@@ -34,8 +43,8 @@ class vector {
         void assign(std::size_t n, const T& v);
 
         // Iterators
-        T* begin() { return data_; }
-        T* end() { return data_ + size_; }
+        T* begin() const { return data_; }
+        T* end() const { return data_ + size_; }
         T& front() { return data_[0]; }
         T& back() { return data_[size_ - 1]; }
 
@@ -43,7 +52,7 @@ class vector {
         std::size_t size() const { return size_; }
         std::size_t max_size() const { return max_size_; }
         bool empty() const { return size_ == 0; }
-        
+
         // Memory functions
         void resize(std::size_t n);
         void shrink_to_fit();
@@ -91,7 +100,7 @@ void vector<T>::resize(std::size_t n){
     else
         std::copy(data_, data_ + size_, tmp);
     delete[] data_;
-    max_size_ = n; 
+    max_size_ = n;
     data_ = tmp;
 }
 
@@ -127,5 +136,7 @@ void vector<T>::assign(std::size_t n, const T& v){
     for(std::size_t i = 0; i < n; i++)
         data_[i] = v;
     size_ = n;
+}
+
 }
 #endif // include guard
