@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iterator>
 #include <limits.h>
+#include "qp_benchmark.h"
 
 #define N 1000000
 using namespace std::chrono;
@@ -23,12 +24,13 @@ std::uniform_int_distribution<int> dst(INT_MIN, INT_MAX);
 int main() {
     qap::threaded_tree<int> t;
     std::set<int> s;
-    gen.seed(time(NULL));
+    /*gen.seed(time(NULL));
     insert_benchmark(t);
     insert_benchmark(s);
 
     iteration_benchmark(t);
-    iteration_benchmark(s);
+    iteration_benchmark(s);*/
+    qap::bm::compare_all(t, rand, s, rand, 1000000);
 }
 
 template <typename Tree>

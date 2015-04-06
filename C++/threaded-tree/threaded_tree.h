@@ -58,14 +58,29 @@ class threaded_tree {
         Node<T>* left_most(Node<T>* root) const;
         Node<T>* right_most(Node<T>* root) const;
         tt_iterator<T> insert(Node<T>* n, Node<T>* p);
+        void copy_tree(Node<T>* root);
 
     public:
-        typedef tt_iterator<T> iterator;
+        using iterator = tt_iterator<T>;
 
         threaded_tree() : root_(nullptr), size_(0) {};
+        threaded_tree(threaded_tree<T, Compare>&& t) : root_(t.root_) {
+            std::swap(size_, t.size_);
+            t.root_ = nullptr;
+        }
+        threaded_tree(threaded_tree<T, Compare> const& t) {
+            root_ = nullptr;
+            size_ = 0;
+            // calls insert so handles size
+            copy_tree(t.root_);
+        }
         ~threaded_tree() { delete root_; }
 
         tt_iterator<T> insert(T const& x);
+        tt_iterator<T> find(T const& x) const;
+        bool contains(T const& x) const {
+            return find(x) != end();
+        }
         std::size_t size() const { return size_; }
 
         tt_iterator<T> begin() const { return tt_iterator<T>(left_most(root_)); }
@@ -141,6 +156,26 @@ tt_iterator<T> threaded_tree<T, Compare>::insert(Node<T>* n, Node<T>* p) {
 }
 
 template <typename T, typename Compare>
+tt_iterator<T> threaded_tree<T, Compare>::find(T const& x) const {
+    Node<T>* cur = root_;
+    while (cur != nullptr) {
+        if (cur->datum_ == x)
+            return tt_iterator<T>(cur);
+        if (x < cur->datum_) {
+            if (cur->threaded_left())
+                return tt_iterator<T>();
+            cur = cur->left_;
+        }
+        else {
+            if (cur->threaded_right())
+                return tt_iterator<T>();
+            cur = cur->right_;
+        }
+    }
+    return tt_iterator<T>();
+}
+
+template <typename T, typename Compare>
 Node<T>* threaded_tree<T, Compare>::left_most(Node<T>* root) const {
     if (root == nullptr)
         return nullptr;
@@ -156,6 +191,17 @@ Node<T>* threaded_tree<T, Compare>::right_most(Node <T>* root) const {
     while (root->right_ != nullptr && !root->threaded_right())
         root = root->right_;
     return root;
+}
+
+template <typename T, typename Compare>
+void threaded_tree<T, Compare>::copy_tree(Node<T>* root) {
+    if (root == nullptr)
+        return;
+    insert(root->datum_);
+    if (!root->threaded_left())
+        copy_tree(root->left_);
+    if (!root->threaded_right())
+        copy_tree(root->right_);
 }
 
 }
