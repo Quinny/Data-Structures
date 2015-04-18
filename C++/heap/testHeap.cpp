@@ -1,23 +1,16 @@
 #include <iostream>
-#include "Heap.h"
-
-using namespace std;
+#include "heap.h"
+#include <random>
+#include <cassert>
+#include <algorithm>
+#include "qp_bm"
+#include <queue>
 
 int main(void){
-
-	Heap<int> h;
-
-	h.insert(7);
-	h.insert(8);
-	h.insert(9);
-	h.insert(5);
-
-	cout<<(h.pop())<<endl;
-
-	cout<<(h.empty())<<endl;
-
-
-	h.print();	
-
-	return 0;
+    qap::heap<int> h;
+    std::priority_queue<int> q;
+    qap::bm::compare_all(h, rand, rand,
+                         q, rand, rand, 1000000);
+    assert(std::is_heap(h.cbegin(), h.cend()));
+    return 0;
 }

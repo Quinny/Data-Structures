@@ -59,6 +59,10 @@ public:
         list_.push_back(x);
     }
 
+    T pop() {
+        list_.pop_back();
+    }
+
     template <typename Container>
     void extend(Container const& c) {
         for (auto const& i : c)
@@ -99,10 +103,10 @@ public:
     // x = x + {1,2,3} + 5 are possible
     template <typename Container>
     pylist operator + (Container const& c) const {
-        std::vector<T> n = list_;
+        pylist<T> n;
         for (auto const& i : c)
-            n.push_back(i);
-        return pylist(n);
+            n.append(i);
+        return n;
     }
 
     pylist operator + (T const& x) const {
@@ -133,7 +137,18 @@ public:
     T& operator[] (std::size_t i) {
         return list_[i];
     }
+
+    T operator[] (std::size_t i) const {
+        return list_[i];
+    }
 };
+
+// Tuple style pair print
+template <typename T, typename U>
+std::ostream& operator << (std::ostream& out, std::pair<T, U> const& p) {
+    out << "(" << p.first << ", " << p.second << ")";
+    return out;
+}
 
 // Python style printing
 template <typename T>

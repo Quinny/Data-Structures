@@ -14,14 +14,12 @@ int main() {
     x.sort(true);
 
     auto z = qap::py::map([](int x) { return "test"; }, x);
-
     auto zipper = qap::py::zip(x, z);
+
     zipper.sort();
-    for (auto i : zipper)
-        std::cout << i.first << " " << i.second << std::endl;
-
-
+    std::cout << zipper << std::endl;
     std::cout << x << std::endl;
+    std::cout << qap::py::sum(x) << std::endl;
     std::cout << z << std::endl;
     return 0;
 }

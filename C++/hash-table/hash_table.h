@@ -32,7 +32,7 @@ struct hash_table_iterator {
 
     public:
         hash_table_iterator (entry_type* e, entry_type* last) : e_(e), last_(last) {};
-        std::pair<key_type const, value_type> operator * () {
+        std::pair<key_type const, value_type> operator * () const {
             return std::make_pair(e_->key, e_->value);
         }
         void operator ++ () {
@@ -61,7 +61,8 @@ class hash_table {
 
         void rehash();
         void check_load();
-        void rehash_insert(entry_type const&, entry_type* const, std::size_t const);
+        void rehash_insert(entry_type const&, entry_type* const,
+                std::size_t const) const;
     public:
         // type defs
         using iterator = hash_table_iterator<key_type, value_type>;
@@ -89,7 +90,7 @@ class hash_table {
 
         // user facing functions
         void insert(std::pair<key_type, value_type> const& p);
-        entry_type& find(key_type const& k);
+        entry_type& find(key_type const& k) const;
         std::size_t size() const { return cur_size_; }
         bool empty()  const { return cur_size_ == 0; }
         void swap(hash_table<key_type, value_type>& t) {
@@ -103,14 +104,14 @@ class hash_table {
         //hash_table<key_type, value_type>& operator = (hash_table<key_type, value_type
 
         // Iterator stuff
-        iterator begin() {
+        iterator begin() const {
             std::size_t i = 0;
             // maybe keep track of this?
             for (; table_ + i != table_ + max_size_ && !table_[i].occupied; ++i);
             return iterator(table_ + i, table_ + max_size_);
         }
 
-        iterator end() {
+        iterator end() const {
             return iterator(table_ + max_size_, table_ + max_size_);
         }
 };
@@ -149,7 +150,7 @@ void hash_table<key_type, value_type>::insert(std::pair<key_type, value_type> co
 // ================================================================
 template <typename key_type, typename value_type>
 hash_table_entry<key_type, value_type>&
-hash_table<key_type, value_type>::find(key_type const& k) {
+hash_table<key_type, value_type>::find(key_type const& k) const {
     auto orig = h_(k);
     std::size_t start = orig & (max_size_ - 1);
     while (table_[start].occupied) {
@@ -167,7 +168,7 @@ hash_table<key_type, value_type>::find(key_type const& k) {
 template <typename key_type, typename value_type>
 void hash_table<key_type, value_type>::
 rehash_insert(hash_table_entry<key_type, value_type> const& e,
-        hash_table_entry<key_type, value_type>* const new_table, std::size_t const new_size) {
+        hash_table_entry<key_type, value_type>* const new_table, std::size_t const new_size) const {
     // No need to check for resizing when inserting into a new table
     // since we just doubled the size, it is garunteed the load factor
     // will not be exceeded

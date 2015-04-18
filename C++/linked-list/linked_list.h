@@ -61,13 +61,29 @@ template <typename T>
 struct List {
     Node<T>* head_;
     Node<T>* tail_;
+
     List(): head_(nullptr), tail_(nullptr) {};
 
-    list_iterator<T> begin() {
+    List(List<T> const& l) : head_(nullptr), tail_(nullptr) {
+        for (auto&& i : l)
+            push_back(i);
+    }
+
+    List(List<T>&& l) : head_(l.head_), tail_(l.tail_) {
+        l.head_ = nullptr;
+        l.tail_ = nullptr;
+    }
+
+    ~List() {
+        while (!empty())
+            pop_front();
+    }
+
+    list_iterator<T> begin() const {
         return list_iterator<T>(head_);
     }
 
-    list_iterator<T> end() {
+    list_iterator<T> end() const {
         return list_iterator<T>();
     }
 
@@ -94,7 +110,8 @@ struct List {
     void pop_front() {
         Node<T>* tmp = head_;
         head_ = head_->next_;
-        head_->prev_ = nullptr;
+        if (head_ != nullptr)
+            head_->prev_ = nullptr;
         delete tmp;
     }
 

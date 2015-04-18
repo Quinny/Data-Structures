@@ -1,51 +1,62 @@
 #ifndef QP_STACK_H__
 #define QP_STACK_H__
 
+namespace qap {
 
 template <typename T>
-
-struct Node{
+struct node {
 	T datum_;
-	Node<T>* next_;
+	node<T>* next_;
 
-	Node():next_(nullptr){};
-	Node(T const& val):next_(nullptr), datum_(val) {};
+	node() : next_(nullptr) {};
+	node(T const& val) : next_(nullptr), datum_(val) {};
 };
 
 template <typename T>
 
-struct Stack{
+struct stack {
+    node<T>* head_;
+	stack() : head_(nullptr) {};
 
-	Node<T>* head_;
+    stack(stack<T> const& s) : head_(nullptr) {
+       node<T>* tmp = s.head_;
+       while (tmp != nullptr) {
+           push(tmp->datum_);
+           tmp = tmp->next_;
+        }
+    }
 
-	Stack():head_(nullptr) {};
+    stack(stack<T>&& s) : head_(s.head_) {
+        s.head_ = nullptr;
+    }
 
-	void push(T const& val){
-		Node<T>* n=new Node<T>(val);
-		n->next_=head_;
-		head_=n;
+    ~stack() {
+        while (!empty())
+            pop();
+    }
+
+    void push(T const& val){
+		node<T>* n = new node<T>(val);
+		n->next_ = head_;
+		head_ = n;
 	}
-
-	T peek(){
+	
+    T peek() const {
 		return head_->datum_;
 	}
 
-	T pop(){
-		T tmp=peek();
-		Node<T>* oldHead=head_;
-		head_=head_->next_;
-		delete oldHead;
-		return tmp;
+	void pop() {
+		node<T>* tmp = head_;
+		head_ = head_->next_;
+		delete tmp;
 	}
 
 	bool empty(){
-		return head_==nullptr;
+		return head_ == nullptr;
 	}
-
-
 };
 
-
+} // qap namespace
 
 //ifndef QP_STACK_H__
 #endif

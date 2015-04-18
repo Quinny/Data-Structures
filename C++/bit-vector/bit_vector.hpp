@@ -2,6 +2,9 @@
 #define QP_BIT_VECTOR_H_
 
 #include <string>
+#include <iostream>
+
+namespace qap {
 
 template <unsigned long N>
 class bit_vector{
@@ -84,5 +87,19 @@ std::string bit_vector<N>::to_string() const {
 	}
 	return s;
 }
+
+templat <unsigned long N>
+std::ostream& operator << (std::ostream& out, qap::bit_vector<N> v) {
+    for (unsigned long i = 0; i < v.size(); ++i) {
+        if (v.get(i))
+            out << '1';
+        else
+            out << '0';
+    }
+    return out;
+}
+
+
+} // namespace qap
 
 #endif
