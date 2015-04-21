@@ -9,11 +9,12 @@
 
 namespace qap {
 
-// Helper function for comparing two strings
+// Helper function for comparing containers
 // and computing the edit distance between them
-//
-// Maybe generalize this for all containers?
-unsigned lev_dist(std::string const& s1, std::string const& s2) {
+
+template <typename T,
+         template <typename, typename ...> class Container>
+unsigned lev_dist(Container<T> const& s1, Container<T> const& s2) {
     const std::size_t len1 = s1.size();
     const std::size_t len2 = s2.size();
 
@@ -22,47 +23,60 @@ unsigned lev_dist(std::string const& s1, std::string const& s2) {
 
     for (unsigned i = 0; i < prev_col.size(); ++i)
         prev_col[i] = i;
-    for (unsigned i = 0; i < len1; ++i) {
+    unsigned i = 0;
+    for (auto it1 : s1) {
         col[0] = i + 1;
-        for (unsigned j = 0; j < len2; ++j) {
-            unsigned cmp = !(s1[i] == s2[j]);
+        unsigned j = 0;
+        for (auto it2 : s2) {
+            unsigned cmp = !(it1 == it2);
             col[j + 1] =
                 std::min({prev_col[j + 1] + 1, col[j] + 1, prev_col[j] + cmp});
+            ++j;
         }
         col.swap(prev_col);
+        ++i;
     }
     return prev_col[len2];
 }
 
 // Node structure for bk_tree
 // Maps lev distances to other nodes
+template <typename T>
 struct bk_node {
     // maps lev_distance to new node
     std::map<int, bk_node*> edges_;
-    std::string word_;
+    T word_;
 
-    bk_node(std::string const& s) : word_(s) {};
+    bk_node(T const& s) : word_(s) {};
 };
 
+template <typename T = char,
+         template <typename, typename ...> class Container = std::basic_string>
 class bk_tree {
 
+public:
+    using value_type = T;
+    using container_type = Container<T>;
+
 private:
-    bk_node* root_;
+    bk_node<container_type>* root_;
 
 public:
     bk_tree() : root_(nullptr) {};
     ~bk_tree();
-    void insert(std::string const&);
+    void insert(container_type const&);
     void print() const;
-    void print(bk_node*) const;
+    void print(bk_node<container_type>*) const;
     // find all strings within n units of input string
-    std::vector<std::string> find_all(std::string const& s, int n) const;
+    std::vector<container_type> find_all(container_type const& s, int n) const;
 };
 
-bk_tree::~bk_tree() {
+template <typename T,
+         template <typename, typename ...> class Container>
+bk_tree<T, Container>::~bk_tree() {
     if (root_ == nullptr)
         return;
-    std::queue<bk_node*> q;
+    std::queue<bk_node<container_type>*> q;
     q.push(root_);
     while (!q.empty()) {
         auto cur = q.front();
@@ -74,10 +88,12 @@ bk_tree::~bk_tree() {
     }
 }
 
-std::vector<std::string>
-bk_tree::find_all(std::string const& s, int n) const {
-    std::queue<bk_node*> q;
-    std::vector<std::string> results;
+template <typename T,
+         template <typename, typename ...> class Container>
+std::vector<Container<T>>
+bk_tree<T, Container>::find_all(container_type const& s, int n) const {
+    std::queue<bk_node<container_type>*> q;
+    std::vector<container_type> results;
     q.push(root_);
     while (!q.empty()) {
         auto cur = q.front();
@@ -99,19 +115,21 @@ bk_tree::find_all(std::string const& s, int n) const {
     return results;
 }
 
-void bk_tree::insert(std::string const& s) {
+template <typename T,
+         template <typename, typename ...> class Container>
+void bk_tree<T, Container>::insert(container_type const& s) {
     if (root_ == nullptr) {
-        root_ = new bk_node(s);
+        root_ = new bk_node<container_type>(s);
         return;
     }
-    bk_node* curpos = root_;
+    bk_node<container_type>* curpos = root_;
     while (true) {
         auto dist = lev_dist(curpos->word_, s);
         // test insert with nullptr to avoid allocating memory
         auto test = curpos->edges_.insert({dist, nullptr});
         // If the insertion was successfull, then the node did not exist
         if (test.second) {
-            test.first->second = new bk_node(s);
+            test.first->second = new bk_node<container_type>(s);
             return;
         }
         curpos = test.first->second;

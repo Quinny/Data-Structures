@@ -3,12 +3,13 @@
 #include <fstream>
 
 int main(int argc, char* argv[]) {
-    if (argc == 1) {
-        std::cout << "Enter a dictionary file" << std::endl;
-        return 0;
-    }
-    qap::bk_tree t;
-    std::ifstream dict(argv[1]);
+    /*std::string dict_file;
+    if (argc == 1)
+        dict_file = "/usr/share/dict/words";
+    else
+        dict_file = argv[1];
+    qap::bk_tree<> t;
+    std::ifstream dict(dict_file);
     for (std::string s; dict >> s; )
         t.insert(s);
     std::cout << "file imported, do lookups now" << std::endl;
@@ -22,6 +23,17 @@ int main(int argc, char* argv[]) {
         for (auto i : v)
             std::cout << i << std::endl;
         std::cout << "------------" << std::endl;
+    }*/
+    
+    qap::bk_tree<int, std::vector> t2;
+    t2.insert({1,2,3});
+    t2.insert({3,2,1});
+
+    auto x = t2.find_all({1,2,4}, 1);
+    for (auto i : x) {
+        for (auto j : i)
+            std::cout << j << " ";
+        std::cout << std::endl;
     }
     return 0;
 }
