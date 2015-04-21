@@ -21,5 +21,7 @@ int main() {
     std::cout << x << std::endl;
     std::cout << qap::py::sum(x) << std::endl;
     std::cout << z << std::endl;
+
+    std::cout << x.count(2) << std::endl;
     return 0;
 }

@@ -83,7 +83,7 @@ public:
 
     std::size_t count(T const& x) {
         std::size_t c = 0;
-        for (auto const& i : x) {
+        for (auto const& i : list_) {
             if (i == x)
                 ++c;
         }
@@ -103,7 +103,7 @@ public:
     // x = x + {1,2,3} + 5 are possible
     template <typename Container>
     pylist operator + (Container const& c) const {
-        pylist<T> n;
+        pylist<T> n = *this;
         for (auto const& i : c)
             n.append(i);
         return n;
