@@ -21,6 +21,10 @@ void f(int x) {
     std::cout << x << " is even" << std::endl;
 }
 
+void f2(int x) {
+    std::cout << x << " is even again..." << std::endl;
+}
+
 void g(int x) {
     std::cout << x << " is odd" << std::endl;
 }
@@ -28,6 +32,7 @@ void g(int x) {
 int main() {
     Doer d;
     d.on_even = f;
+    d.on_even += f2;
     d.on_odd = g;
     d.read();
 }

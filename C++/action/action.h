@@ -37,6 +37,11 @@ public:
         functions_.push_back(f);
     }
 
+    void operator += (action<In...> f) {
+        for (auto&& i : f.functions_)
+            functions_.push_back(i);
+    }
+
     void operator ()(In... args) const {
         for (auto&& i : functions_)
             i(args...);

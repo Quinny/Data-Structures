@@ -11,7 +11,6 @@ namespace qap {
 
 // Helper function for comparing containers
 // and computing the edit distance between them
-
 template <typename T,
          template <typename, typename ...> class Container>
 unsigned lev_dist(Container<T> const& s1, Container<T> const& s2) {
@@ -63,6 +62,13 @@ private:
 
 public:
     bk_tree() : root_(nullptr) {};
+    bk_tree(bk_tree<value_type, Container>&& n) {
+        root_ = n.root_;
+        n.root_ = nullptr;
+    }
+
+    // copy constructor requires some thought...
+
     ~bk_tree();
     void insert(container_type const&);
     void print() const;
@@ -70,23 +76,6 @@ public:
     // find all strings within n units of input string
     std::vector<container_type> find_all(container_type const& s, int n) const;
 };
-
-template <typename T,
-         template <typename, typename ...> class Container>
-bk_tree<T, Container>::~bk_tree() {
-    if (root_ == nullptr)
-        return;
-    std::queue<bk_node<container_type>*> q;
-    q.push(root_);
-    while (!q.empty()) {
-        auto cur = q.front();
-        q.pop();
-        for (auto i : cur->edges_)
-            q.push(i.second);
-        cur->edges_.clear();
-        delete cur;
-    }
-}
 
 template <typename T,
          template <typename, typename ...> class Container>
@@ -133,6 +122,23 @@ void bk_tree<T, Container>::insert(container_type const& s) {
             return;
         }
         curpos = test.first->second;
+    }
+}
+
+template <typename T,
+         template <typename, typename ...> class Container>
+bk_tree<T, Container>::~bk_tree() {
+    if (root_ == nullptr)
+        return;
+    std::queue<bk_node<container_type>*> q;
+    q.push(root_);
+    while (!q.empty()) {
+        auto cur = q.front();
+        q.pop();
+        for (auto i : cur->edges_)
+            q.push(i.second);
+        cur->edges_.clear();
+        delete cur;
     }
 }
 
