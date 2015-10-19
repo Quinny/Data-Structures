@@ -24,9 +24,9 @@ public:
 
     pylist(std::vector<T> const& v) : list_(v) {};
 
-    pylist(std::initializer_list<T> const& init) {
-        for (auto const& i : init)
-            append(i);
+    pylist(std::initializer_list<T> const& init) : list_(init) {
+        /*for (auto const& i : init)
+            append(i);*/
     }
 
     // Allow pylist to be constructed with any container
