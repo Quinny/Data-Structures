@@ -1,10 +1,9 @@
 template <typename T>
 struct node {
     node* next_;
-    node* prev_;
     T datum_;
 
-    node(const T& d): next_(nullptr), prev_(nullptr), datum_(d) {};
+    node(const T& d): next_(nullptr), datum_(d) {};
 };
 
 
