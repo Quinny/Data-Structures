@@ -14,14 +14,31 @@ public:
         return has_value_;
     }
 
-    T or_else(const T& v) {
+    T get() const {
+        return value_;
+    }
+
+    template <typename U>
+    optional<U> map(std::function<U(T)> f) {
+        if (has_value_)
+            return optional<U>(f(value_));
+        return optional<U>();
+    }
+
+    T or_else(const T& v) const {
         if (has_value_)
             return value_;
         return v;
     }
 
-    void if_present(std::function<void(T)> f) {
+    void if_present(std::function<void(T)> f) const {
         if (has_value_)
             f(value_);
+    }
+
+    optional<T> filter(std::function<bool(T)> p) const {
+        if (p(value_))
+            return optional(value_);
+        return optional();
     }
 };
